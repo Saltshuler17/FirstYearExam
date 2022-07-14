@@ -1,0 +1,52 @@
+---
+title: "Covid-19 Variant Data"
+author: "Sam Altshuler"
+date: "7/14/2022"
+output: pdf_document
+---
+
+## Load in correct libraries
+```{r, message=FALSE}
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+```
+
+Read in the data from a csv. Data downloaded from the California Health and Human Services website.
+
+```{r}
+total_data <- read.csv("covid19_variants.csv")
+head(total_data)
+```
+ 
+Next we can preliminarily graph the data to see what it looks like.
+
+```{r}
+ggplot(total_data, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
+  geom_line()
+```
+Now this looks similar to example graph, but the next step is to remove all rows that have "Total" variants as this row will always be 100%. We also need to remove the "other" rows.  
+
+```{r}
+no_total <- total_data %>% filter(variant_name != "Total" )
+variants <- no_total %>% filter(variant_name != "Other")
+ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
+  geom_line()
+```
+Next we want to change the x axis to show the 3 letters of the month with the year. This is done by using the lubridate package.
+```{r}
+variants$date <- as_date(variants$date)
+ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
+  geom_line()+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b-%Y")
+```
+Now that our graph now has the correct axes, let's make it more readable.
+```{r}
+ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
+  geom_line()+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b-%Y")+ 
+  labs(y ="Percentage of sequenced specimens", x = "", color = "Variant" )+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+  
+```
+
