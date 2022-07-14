@@ -1,6 +1,6 @@
 ---
 title: "Covid-19 Variant Data"
-author: "Sam Altshuler"
+author: "Sam Altshuler  \nPID: A59010373"
 date: "7/14/2022"
 output: pdf_document
 ---
@@ -12,13 +12,16 @@ library(lubridate)
 library(ggplot2)
 ```
 
+## Load in the Covid-19 Variant data
 Read in the data from a csv. Data downloaded from the California Health and Human Services website.
 
 ```{r}
 total_data <- read.csv("covid19_variants.csv")
+# Preliminary look at the data
 head(total_data)
 ```
- 
+
+## Start to graph the variants over time 
 Next we can preliminarily graph the data to see what it looks like.
 
 ```{r}
@@ -28,24 +31,56 @@ ggplot(total_data, aes(x = date, y = percentage, group = variant_name, color = v
 Now this looks similar to example graph, but the next step is to remove all rows that have "Total" variants as this row will always be 100%. We also need to remove the "other" rows.  
 
 ```{r}
+# Filter out all rows that have a variant name of "Total"
 no_total <- total_data %>% filter(variant_name != "Total" )
+
+# Filter out all rows with a variant name of "Other"
 variants <- no_total %>% filter(variant_name != "Other")
+
+# Graph to ensure that total and other are no longer represented on the graph
 ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
   geom_line()
 ```
-Next we want to change the x axis to show the 3 letters of the month with the year. This is done by using the lubridate package.
+Next we want to change the x axis to 1 month increments that show the 3 letters of the month with the year. This is done by using the lubridate package.
 ```{r}
+# Convert each date in the date column into the lubridate date class.
 variants$date <- as_date(variants$date)
+
+#graph again, with the X axis broken into 1 month increments and displaying the month and year
 ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
   geom_line()+
-  scale_x_date(date_breaks = "1 month", date_labels = "%b-%Y")
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")
 ```
-Now that our graph now has the correct axes, let's make it more readable.
+Now that our graph now has the correct axes, let's make it more readable by angling the x axis text so it doesn't overlap. We will also get rid of the X axis title. Lastly, we will add a title to the legend.
 ```{r}
 ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
   geom_line()+
-  scale_x_date(date_breaks = "1 month", date_labels = "%b-%Y")+ 
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")+ 
   labs(y ="Percentage of sequenced specimens", x = "", color = "Variant" )+
+  # Angle the x axis text so that they don't overlap
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+  
+```
+Now that the labels and axes are nice and readable, let's make the lines a bit thicker to be easier to see and add a title to the graph.
+```{r}
+ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
+  geom_line(size = 0.75)+ #change the width of the lines
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")+ 
+  labs(y ="Percentage of sequenced specimens", x = "", color = "Variant", 
+       title = "COVID-19 Variants in California")+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+  
+```
+Lastly, we need to add a caption to state where the data is from. This will be the final product!
+```{r}
+ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
+  geom_line(size = 0.75)+ #change the width of the slide
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")+ 
+  labs(y ="Percentage of sequenced specimens", x = "", color = "Variant", 
+       title = "COVID-19 Variants in California", 
+       # Adds in a caption on the bottom right of the graph to show the data source
+       caption = "Data Source: <https://data.chhs.ca.gov/>")+  
+  theme_bw()+
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
   
 ```
