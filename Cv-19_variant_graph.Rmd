@@ -22,7 +22,7 @@ head(total_data)
 ```
 
 ## Start to graph the variants over time 
-Next we can preliminarily graph the data to see what it looks like.
+Next we can preliminarily graph the data using ggplot and `geom_line()` to see what it looks like.
 
 ```{r}
 ggplot(total_data, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
@@ -41,7 +41,7 @@ variants <- no_total %>% filter(variant_name != "Other")
 ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
   geom_line()
 ```
-Next we want to change the x axis to 1 month increments that show the 3 letters of the month with the year. This is done by using the lubridate package.
+Next we want to change the x axis to 1 month increments that show the 3 letters of the month with the year. This is done by using the lubridate package. But first, we need to reformat the date column into a format that lubridate can use.
 ```{r}
 # Convert each date in the date column into the lubridate date class.
 variants$date <- as_date(variants$date)
@@ -51,7 +51,7 @@ ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = var
   geom_line()+
   scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")
 ```
-Now that our graph now has the correct axes, let's make it more readable by angling the x axis text so it doesn't overlap. We will also get rid of the X axis title. Lastly, we will add a title to the legend.
+Now that our graph now has the correct axes, let's make it more readable by angling the x axis text so it doesn't overlap. We will also get rid of the X axis title since dates are already pretty descriptive of the X axis. Lastly, we will add a title to the legend.
 ```{r}
 ggplot(variants, aes(x = date, y = percentage, group = variant_name, color = variant_name))+
   geom_line()+
